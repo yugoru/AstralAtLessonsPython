@@ -1,10 +1,9 @@
 import requests
 
-
 class OwfHttpClient:
     """Класс, инкапсулирующий Http запросы тестируемому приложению"""
 
-    def _init_(self, base_url: str):
+    def __init__(self, base_url: str):
         self.base_url = base_url
 
     def register(self, register_data: dict) -> requests.Response:
