@@ -1,5 +1,6 @@
 import requests
 
+
 class OwfHttpClient:
     """Класс, инкапсулирующий Http запросы тестируемому приложению"""
 
@@ -9,5 +10,5 @@ class OwfHttpClient:
     def register(self, register_data: dict) -> requests.Response:
         return requests.post(self.base_url + 'api/auth/register', json=register_data)
 
-    def login(self):
-        ...
+    def login(self, login_data: dict) -> requests.Response:
+        return requests.post(self.base_url + 'api/auth/login', json=login_data)
