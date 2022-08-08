@@ -33,3 +33,10 @@ class UserVm(JSONWizard):
     email: str
     phone_number: str
     registration_date: DateTimePattern['%Y-%m-%dT%H:%M:%S.%fZ']
+
+
+@dataclass
+class CheckLoginVm(str):
+    email: str
+    password: str
+
