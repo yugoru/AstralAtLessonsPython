@@ -1,7 +1,7 @@
 from config import APP_BASE_URL
-from test_data.create_user import NO_EMAIL, NO_PASSWORD, ALREADY_REGISTERED
+from test_data.create_user_scenarios import NO_EMAIL, NO_PASSWORD, ALREADY_REGISTERED
 from app_driver.owf_http_client import OwfHttpClient
-from test_data.create_user import badPhone
+from test_data.create_user_scenarios import badPhone
 
 
 class TestNoSuccessCreateUser:
