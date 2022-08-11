@@ -1,9 +1,11 @@
 import pytest
 
+from app_driver.db_cleaner import DbCleaner
 from app_driver.db_connector import DbConnector
 from config import APP_BASE_URL, DB_CONNECTION_PARAMS
 from test_data.context import TestContext
-from test_data.create_user_scenarios import SUCCESS_CREATE_USER, assert_login_getAdmin
+from test_data.create_user_scenarios import SUCCESS_CREATE_USER
+from test_data.data_helper import assert_login_getAdmin
 from app_driver.owf_http_client import OwfHttpClient
 from test_data.models.viev_models import *
 
@@ -15,6 +17,7 @@ class TestSuccessCreateUser:
     def setup_class(self):
         self.http_client = OwfHttpClient(APP_BASE_URL)
         self.db_connector = DbConnector(DB_CONNECTION_PARAMS)
+        self.db_cleaner = DbCleaner(DB_CONNECTION_PARAMS)
 
     def test_success_register(self, test_data: TestContext):
         # Arrange
@@ -29,6 +32,5 @@ class TestSuccessCreateUser:
         assert test_data["message"] == "Пользователь " + register_data.email + " успешно зарегистрирован"
         assert_login_getAdmin(self, register_data.email)
 
-
-
-
+    def teardown_class(self):
+        self.db_cleaner.delete_all_users()

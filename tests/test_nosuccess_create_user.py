@@ -1,8 +1,9 @@
 import pytest
 
-from config import APP_BASE_URL
+from app_driver.db_cleaner import DbCleaner
+from config import APP_BASE_URL, DB_CONNECTION_PARAMS
 from test_data.context import TestContext
-from test_data.create_user_scenarios import NO_EMAIL, NO_PASSWORD, ALREADY_REGISTERED, BAD_PHONE
+from test_data.create_user_scenarios import NO_EMAIL, NO_PASSWORD, ALREADY_REGISTERED, BAD_PHONE, PASSWORDS_DONT_MATCH
 from app_driver.owf_http_client import OwfHttpClient
 from test_data.models.viev_models import RegisterVm
 
@@ -11,6 +12,9 @@ class TestNoSuccessCreateUser:
 
     def setup(self):
         self.http_client = OwfHttpClient(APP_BASE_URL)
+        self.db_cleaner = DbCleaner(DB_CONNECTION_PARAMS)
+        self.db_cleaner.delete_all_users()
+        self.http_client.register_bad_requests(ALREADY_REGISTERED)
 
     def test_register_no_email(self):
         register_response = self.http_client.register_bad_requests(NO_EMAIL)
@@ -24,6 +28,19 @@ class TestNoSuccessCreateUser:
         assert register_response.status_code == 400
         assert response_body["errors"]["Password"] == ["The Password field is required."]
 
+    def test_password_dont_match(self):
+        register_response = self.http_client.register_bad_requests(PASSWORDS_DONT_MATCH)
+        response_body = register_response.json()
+        assert register_response.status_code == 400
+        assert response_body["errorMessage"] == "Пароли не совпадают"
+
+    def test_register_already_registered(self):
+        register_response = self.http_client.register_bad_requests(ALREADY_REGISTERED)
+        response_body = register_response.json()
+        assert register_response.status_code == 400
+        assert response_body["errorMessage"] == "Пользователь с Email: " + ALREADY_REGISTERED[
+            'email'] + " уже зарегистрирован"
+
     @pytest.mark.incremental
     @pytest.mark.parametrize('test_data', BAD_PHONE, scope="class")
     def test_register_bad_phone(self, test_data: TestContext):
@@ -32,10 +49,3 @@ class TestNoSuccessCreateUser:
         test_data = response.json()
         assert response.status_code == 400
         assert test_data["errorMessage"] == "Номер телефона должен соответствовать регулярному выражению ^\\+7\\d{10}$"
-
-    def test_register_already_registered(self):
-        register_response = self.http_client.register_bad_requests(ALREADY_REGISTERED)
-        response_body = register_response.json()
-        assert register_response.status_code == 400
-        assert response_body["errorMessage"] == "Пользователь с Email: " + ALREADY_REGISTERED[
-            'email'] + " уже зарегистрирован"
